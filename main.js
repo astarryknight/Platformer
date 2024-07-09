@@ -61,11 +61,13 @@ class Obstacle{
     }
 }
 
-var player = new Player(600-50,0,100,0);
 
 function draw() {
     const canvas = document.getElementById("canvas");
     if (canvas.getContext) {
+
+        var isScrolling = !(player.xPos<canvas.width/2)
+
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);//clear canvas
 
@@ -75,16 +77,27 @@ function draw() {
 
         //draw bird
         ctx.fillStyle="#ff00ff"
-        ctx.fillRect(player.xPos,player.yPos,player.width, player.width);   
+        ctx.fillRect((isScrolling?canvas.width/2:player.xPos),player.yPos,player.width, player.width);   
+
+        //draw obstacles
+        ctx.fillStyle="#00ffff"
+        for (let obstacle of obstacles){
+            ctx.fillRect((isScrolling?obstacle.xPos-player.xPos+canvas.width/2:obstacle.xPos), obstacle.yPos, obstacle.width, obstacle.height);
+        }
     }
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }
 
 var gameSpeed=25;
 var speed=gameSpeed; //inverse scale - lower number = faster speed
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
+//objects:
+var player = new Player(600-50,0,350,0);
+var obstacle = new Obstacle(600,100,100,100);
+var obstacles=[new Obstacle(100,500,100,25), new Obstacle(600,100,100,100), new Obstacle(600,100,100,100)];
 
 var start=Date.now();
 var gameOver=false;
@@ -126,11 +139,8 @@ function loop(){
         if(player.xPos<0){
             player.xPos=0;
             player.xPos=0;
-        } else if(player.xPos>canvas.width-player.width){
-            player.xVel=0;
-            player.xPos=canvas.width-player.width;
         }
-
+        checkCollisions();
         start=now;
     }
     draw();
@@ -143,22 +153,19 @@ function loop(){
 }
 
 function checkCollisions(){
-    for(let pipe of pipes){
-        if(checkPipeCollision(pipe)){
-            return true;
+    for(let obstacle of obstacles){
+        if(checkObjectCollision(obstacle)){
+            console.log("touching!")
         }
     }
     return false;
 }
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-function checkPipeCollision(pipe){
-    if(player.xPos < pipe.xPos+pipe.width &&
-        player.xPos+player.width > pipe.xPos &&
-        player.yPos < pipe.yPos + pipe.width && 
-        player.yPos + player.width > pipe.yPos){
+function checkObjectCollision(obstacle){
+    if(player.xPos < obstacle.xPos+obstacle.width &&
+        player.xPos+player.width > obstacle.xPos &&
+        player.yPos < obstacle.yPos + obstacle.width && 
+        player.yPos + player.width > obstacle.yPos){
             return true;
     }
     return false;
@@ -166,13 +173,13 @@ function checkPipeCollision(pipe){
 
 //handling keypresses
 addEventListener("keydown", (event) => {
-    var addVel = 20;
+    var addVel = 15;
     if (event.isComposing) {
         return;
     }
     if(event.key==" " || event.key=="ArrowUp"){
         if(grounded){
-            player.yVel=11;
+            player.yVel=20;
             grounded=false;
         }
     }
