@@ -34,7 +34,7 @@ class Player{
     }
 }
 
-class Pipe{
+class Obstacle{
     constructor(xPos, yPos, baseHeight){
         this.xPos_ = xPos;
         this.yPos_ = yPos;
@@ -60,7 +60,7 @@ class Pipe{
     }
 }
 
-var player = new Player(600-50,0,20,0);
+var player = new Player(600-50,0,100,0);
 
 function draw() {
     const canvas = document.getElementById("canvas");
@@ -87,21 +87,47 @@ function getRandomInt(max) {
 
 var start=Date.now();
 var gameOver=false;
+var grounded=true;
+var held=false;
 
 //main game loop
 function loop(){
     var now = Date.now();
     if((now-start)>=speed){
+        //calculating movement - y
         var bound = 15
         if(player.yVel>-bound){player.yVel+=-1};
         player.yPos-=player.yVel
 
+        //top and bottom bounds
         if(player.yPos<0){
             player.yVel=0
             player.yPos=0
         } else if(player.yPos>canvas.height-player.width){
             player.yVel=0
             player.yPos=canvas.height-player.width
+            grounded=true;
+        }
+
+        //calculating movement - x
+        if(!held){
+            if(player.xVel<0){
+                player.xVel+=1;
+            }
+            else if(player.xVel>0){
+                player.xVel-=1;
+            }
+        }
+
+        player.xPos-=player.xVel
+
+        //let and right bounds
+        if(player.xPos<0){
+            player.xPos=0;
+            player.xPos=0;
+        } else if(player.xPos>canvas.width-player.width){
+            player.xVel=0;
+            player.xPos=canvas.width-player.width;
         }
 
         start=now;
@@ -139,11 +165,32 @@ function checkPipeCollision(pipe){
 
 //handling keypresses
 addEventListener("keydown", (event) => {
+    var addVel = 20;
     if (event.isComposing) {
         return;
     }
-    if(event.key==" "){
-        player.yVel=11
+    if(event.key==" " || event.key=="ArrowUp"){
+        if(grounded){
+            player.yVel=11;
+            grounded=false;
+        }
+    }
+    if(event.key=="ArrowLeft"){
+        player.xVel=addVel;
+        held=true;
+    }
+    if(event.key=="ArrowRight"){
+        player.xVel=-addVel;
+        held=true;
+    }
+});
+
+addEventListener("keyup", (event) => {
+    if (event.isComposing) {
+        return;
+    }
+    if(event.key=="ArrowRight" || event.key=="ArrowLeft"){
+        held=false;
     }
 });
 
