@@ -35,10 +35,11 @@ class Player{
 }
 
 class Obstacle{
-    constructor(xPos, yPos, baseHeight){
+    constructor(xPos, yPos, width, height){
         this.xPos_ = xPos;
         this.yPos_ = yPos;
-        this.baseHeight_ = baseHeight;
+        this.width_ = width;
+        this.height_ = height;
     }
     get xPos(){
         return this.xPos_
@@ -46,11 +47,11 @@ class Obstacle{
     get yPos(){
         return this.yPos_
     }
-    get baseHeight(){
-        return this.baseHeight_
-    }
     get width(){
-        return 75;
+        return this.width_
+    }
+    get height(){
+        return this.height_
     }
     set xPos(xPos){
         this.xPos_ = xPos
