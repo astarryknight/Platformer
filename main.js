@@ -165,7 +165,7 @@ function checkCollisions(){
                     player.yVel=0;
                 }
             } else{
-                if(player.yPos>obstacle.height-player.width && player.yVel<0){
+                if(player.yPos>obstacle.yPos-player.width && player.yVel<0){
                     player.yVel=0
                     player.yPos=obstacle.yPos-player.width
                     grounded=true;
