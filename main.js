@@ -164,7 +164,7 @@ function checkCollisions(){
 function checkObjectCollision(obstacle){
     if(player.xPos < obstacle.xPos+obstacle.width &&
         player.xPos+player.width > obstacle.xPos &&
-        player.yPos < obstacle.yPos + obstacle.width && 
+        player.yPos < obstacle.yPos + obstacle.height && 
         player.yPos + player.width > obstacle.yPos){
             return true;
     }
