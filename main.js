@@ -109,7 +109,7 @@ function loop(){
     var now = Date.now();
     if((now-start)>=speed){
         //calculating movement - y
-        var bound = 15
+        var bound = 20
         if(player.yVel>-bound){player.yVel+=-1};
         player.yPos-=player.yVel
 
@@ -140,6 +140,7 @@ function loop(){
             player.xPos=0;
             player.xPos=0;
         }
+
         checkCollisions();
         start=now;
     }
@@ -156,6 +157,16 @@ function checkCollisions(){
     for(let obstacle of obstacles){
         if(checkObjectCollision(obstacle)){
             console.log("touching!")
+            if(player.yPos>obstacle.height-player.width && player.yVel<0){
+                player.yVel=0
+                player.yPos=obstacle.yPos-player.width
+                console.log(obstacle.yPos-player.width)
+                grounded=true;
+            }
+            if(player.yVel>0){
+                player.yPos=obstacle.yPos+obstacle.height;
+                player.yVel=0;
+            }
         }
     }
     return false;
