@@ -112,7 +112,7 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-var gameSpeed=25;
+var gameSpeed=10;
 var speed=gameSpeed; //inverse scale - lower number = faster speed
 
 //objects:
