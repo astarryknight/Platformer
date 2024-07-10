@@ -35,11 +35,12 @@ class Player{
 }
 
 class Obstacle{
-    constructor(xPos, yPos, width, height){
+    constructor(xPos, yPos, width, height, danger=false){
         this.xPos_ = xPos;
         this.yPos_ = yPos;
         this.width_ = width;
         this.height_ = height;
+        this.danger_ = danger;
     }
     get xPos(){
         return this.xPos_
@@ -59,16 +60,19 @@ class Obstacle{
     set yPos(yPos){
         this.yPos_ = yPos
     }
+    get danger(){
+        return this.danger_;
+    }
 }
 
 
+const canvas = document.getElementById("canvas");
+const ctx = canvas && canvas.getContext && canvas.getContext("2d");
 function draw() {
-    const canvas = document.getElementById("canvas");
-    if (canvas.getContext) {
+    if (ctx) {
 
         var isScrolling = !(player.xPos<canvas.width/2)
 
-        const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);//clear canvas
 
         //draw background
@@ -80,8 +84,8 @@ function draw() {
         ctx.fillRect((isScrolling?canvas.width/2:player.xPos),player.yPos,player.width, player.width);   
 
         //draw obstacles
-        ctx.fillStyle="#00ffff"
         for (let obstacle of obstacles){
+            ctx.fillStyle=obstacle.danger ? "#ff3300" : "#00ffff";
             ctx.fillRect((isScrolling?obstacle.xPos-player.xPos+canvas.width/2:obstacle.xPos), obstacle.yPos, obstacle.width, obstacle.height);
         }
     }
@@ -97,7 +101,9 @@ var speed=gameSpeed; //inverse scale - lower number = faster speed
 //objects:
 var player = new Player(600-50,0,350,0);
 var obstacle = new Obstacle(600,100,100,100);
-var obstacles=[new Obstacle(100,500,100,25), new Obstacle(600,100,100,100), new Obstacle(600,100,100,100)];
+var obstacles=[
+    new Obstacle(100,500,100,25), new Obstacle(300,400,400,25), new Obstacle(100,225,125,25)
+];
 
 var start=Date.now();
 var gameOver=false;
@@ -169,7 +175,7 @@ function checkCollisions(){
                     player.yVel=0
                     player.yPos=obstacle.yPos-player.width
                     grounded=true;
-                } 
+                }
                 if(player.xVel>0 && !grounded){
                     player.xPos=obstacle.xPos+obstacle.width;
                     player.xVel=0;
@@ -195,7 +201,7 @@ function checkObjectCollision(obstacle){
 
 //handling keypresses
 addEventListener("keydown", (event) => {
-    var addVel = 15;
+    var addVel = 10;
     if (event.isComposing) {
         return;
     }
@@ -225,3 +231,25 @@ addEventListener("keyup", (event) => {
 });
 
 window.requestAnimationFrame(loop)
+
+let mx=0,my=0,mb=null;
+let dx,dy,o1;
+canvas.onmousedown=(e)=>{
+    mb=e.button;
+}
+canvas.onmouseup=()=>{
+    if (dx!=null) {
+        obstacles.push(
+            new Obstacle(dx,dy,mx-dx,my-dy)
+        );
+        o1=obstacles[obstacles.length-1];
+    }
+    dx=dy=mb=null;
+}
+canvas.onmousemove=(e)=>{
+    mx=e.clientX-canvas.offsetLeft;
+    my=e.clientY-canvas.offsetTop;
+    if (mb==0 && dx==null) {
+        dx=mx,dy=my;
+    }
+}
