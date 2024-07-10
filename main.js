@@ -77,17 +77,34 @@ function draw() {
 
         //draw background
         ctx.fillStyle="#4dc0ca";
-        ctx.fillRect(0,0,canvas.width, canvas.height);
+        var image = new Image();
+        image.src = "./background.jpg";
+        var offset=(isScrolling?-(player.xPos-canvas.width/2):0)/1.5;
+        ctx.drawImage(image, offset, 0, canvas.width, canvas.height)
+        ctx.drawImage(image, canvas.width+offset, 0, canvas.width, canvas.height)
+        ctx.drawImage(image, canvas.width*2+offset, 0, canvas.width, canvas.height)
+        ctx.drawImage(image, canvas.width*3+offset, 0, canvas.width, canvas.height)
+        ctx.drawImage(image, canvas.width*4+offset, 0, canvas.width, canvas.height)
+        // ctx.fillRect(0,0,canvas.width, canvas.height);
 
         //draw bird
+        ctx.shadowBlur=10;
         ctx.fillStyle="#ff00ff"
         ctx.fillRect((isScrolling?canvas.width/2:player.xPos),player.yPos,player.width, player.width);   
 
         //draw obstacles
+        ctx.shadowColor = "gray";
+        ctx.shadowOffsetY = 10;
+        ctx.shadowBlur=10;
         for (let obstacle of obstacles){
             ctx.fillStyle=obstacle.danger ? "#ff3300" : "#00ffff";
             ctx.fillRect((isScrolling?obstacle.xPos-player.xPos+canvas.width/2:obstacle.xPos), obstacle.yPos, obstacle.width, obstacle.height);
         }
+        ctx.fillStyle="#ffa0f0"
+        var obstacle=obstacles[obstacles.length-1]
+        ctx.fillRect((isScrolling?obstacle.xPos-player.xPos+canvas.width/2:obstacle.xPos), obstacle.yPos, obstacle.width, obstacle.height);
+        ctx.shadowOffsetY=0;
+        ctx.shadowBlur=0;
     }
 }
 
@@ -102,18 +119,21 @@ var speed=gameSpeed; //inverse scale - lower number = faster speed
 var player = new Player(600-50,0,350,0);
 var obstacle = new Obstacle(600,100,100,100);
 var obstacles=[
-    new Obstacle(100,500,100,25), new Obstacle(300,400,400,25), new Obstacle(100,225,125,25)
+    new Obstacle(100,500,100,25), new Obstacle(300,400,400,25), new Obstacle(100,225,125,25), new Obstacle(700,225,80,25), new Obstacle(850,500,125,25), 
+    new Obstacle(1100,350,125,25), new Obstacle(1300,500,400,400, true), new Obstacle(2000,450,125,25), new Obstacle(2225,300,100,200, true), new Obstacle(2450,450,125,25),
+    new Obstacle(2800,300,100,100)
 ];
 
 var start=Date.now();
 var gameOver=false;
 var grounded=true;
 var held=false;
+var gameWin=false;
 
 //main game loop
 function loop(){
     var now = Date.now();
-    if((now-start)>=speed){
+    if((now-start)>=speed && !gameOver){
         //calculating movement - y
         var bound = 20
         if(player.yVel>-bound){player.yVel+=-1};
@@ -148,6 +168,18 @@ function loop(){
         }
 
         checkCollisions();
+
+        if(gameOver){
+            alert("Game Over!");
+            location.reload();
+        }
+
+        if(gameWin){
+            gameOver=true;
+            alert("You win!");
+            location.reload();
+        }
+
         start=now;
     }
     draw();
@@ -162,6 +194,14 @@ function loop(){
 function checkCollisions(){
     for(let obstacle of obstacles){
         if(checkObjectCollision(obstacle)){
+
+            if(obstacle.danger){
+                gameOver=true;
+            }
+
+            if(obstacle==obstacles[obstacles.length-1]){
+                gameWin=true;
+            }
 
             var initYPos = player.yPos+player.yVel
 
@@ -232,24 +272,24 @@ addEventListener("keyup", (event) => {
 
 window.requestAnimationFrame(loop)
 
-let mx=0,my=0,mb=null;
-let dx,dy,o1;
-canvas.onmousedown=(e)=>{
-    mb=e.button;
-}
-canvas.onmouseup=()=>{
-    if (dx!=null) {
-        obstacles.push(
-            new Obstacle(dx,dy,mx-dx,my-dy)
-        );
-        o1=obstacles[obstacles.length-1];
-    }
-    dx=dy=mb=null;
-}
-canvas.onmousemove=(e)=>{
-    mx=e.clientX-canvas.offsetLeft;
-    my=e.clientY-canvas.offsetTop;
-    if (mb==0 && dx==null) {
-        dx=mx,dy=my;
-    }
-}
+// let mx=0,my=0,mb=null;
+// let dx,dy,o1;
+// canvas.onmousedown=(e)=>{
+//     mb=e.button;
+// }
+// canvas.onmouseup=()=>{
+//     if (dx!=null) {
+//         obstacles.push(
+//             new Obstacle(dx,dy,mx-dx,my-dy)
+//         );
+//         o1=obstacles[obstacles.length-1];
+//     }
+//     dx=dy=mb=null;
+// }
+// canvas.onmousemove=(e)=>{
+//     mx=e.clientX-canvas.offsetLeft;
+//     my=e.clientY-canvas.offsetTop;
+//     if (mb==0 && dx==null) {
+//         dx=mx,dy=my;
+//     }
+// }
